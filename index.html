@@ -1,0 +1,128 @@
+<!DOCTYPE html>
+<html lang="pl">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Symulator Lotto</title>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <header class="top">
+    <div class="wrap brand">
+      <p class="logo">LOTTO</p>
+      <div>
+        <h1>Symulator kuponu</h1>
+        <p class="sub">Zaznacz własne liczby albo dodaj zakłady chybił trafił. Źródło losowości i liczbę kuponów ustawiasz przy kuponie. Przytrzymanie klawisza E dodaje kolejne pojedyncze zakłady.</p>
+      </div>
+    </div>
+    <div class="wrap">
+      <details class="rules">
+        <summary>Zasady i stawki</summary>
+        <ul>
+          <li>Zakład to 6 różnych liczb od 1 do 49 i kosztuje 5 zł.</li>
+          <li>Gra systemowa skreśla od 7 do 12 liczb i obstawia wszystkie szóstki z tego zbioru. System 7 to 7 zakładów, system 12 to 924. Lotto Plus dopisuje się do każdej szóstki.</li>
+          <li>Lotto Plus bierze te same liczby do drugiego losowania. Dopłata wynosi 1 zł.</li>
+          <li>Wygrana zaczyna się od 3 trafień. W Lotto trójka to 35 zł. Czwórka, piątka i szóstka są dzielone z puli. Pula szóstek ma minimum 3&nbsp;000&nbsp;000 zł.</li>
+          <li>Lotto Plus ma stałe kwoty: trójka 10 zł, czwórka 100 zł, piątka 3&nbsp;500 zł, szóstka 1&nbsp;000&nbsp;000 zł.</li>
+          <li>Losowania odbywają się we wtorek, czwartek i sobotę o 22:00.</li>
+          <li>Szansa na szóstkę to 1 do 13&nbsp;983&nbsp;816, a na dowolną wygraną 1 do 54.</li>
+          <li>Źródło losowości wybierasz z listy. Wbudowany generator działa w przeglądarce. ANU QRNG to próżnia kwantowa. LfD, CURBy i NIST to zewnętrzna pula. NIST beacon to osobny publiczny puls.</li>
+          <li>Pole „Ile zakładów” ustawia, ile kuponów chybił trafił dodać naraz. To samo źródło liczy symulowane losowanie.</li>
+          <li>Przytrzymanie klawisza E dodaje kolejne pojedyncze zakłady chybił trafił, dopóki klawisz jest wciśnięty.</li>
+          <li>Kwoty stałe są zgodne z zasadami od 18 sierpnia 2026.</li>
+        </ul>
+      </details>
+    </div>
+  </header>
+
+  <main class="wrap">
+    <section class="panel" aria-labelledby="slip-title">
+      <div class="panel-head">
+        <h2 id="slip-title">Twój kupon</h2>
+        <button id="clear-coupon" class="clear" type="button">Wyczyść kupon</button>
+      </div>
+      <p id="pick-hint" class="hint"></p>
+      <div id="grid" class="grid" role="group" aria-label="Liczby od 1 do 49"></div>
+      <div class="system-row">
+        <label class="check">
+          <input id="system" type="checkbox">
+          <span>Gra systemowa</span>
+        </label>
+        <label id="system-size-label" hidden>
+          Liczb w systemie
+          <select id="system-size">
+            <option value="7">7</option>
+            <option value="8">8</option>
+            <option value="9">9</option>
+            <option value="10">10</option>
+            <option value="11">11</option>
+            <option value="12">12</option>
+          </select>
+        </label>
+      </div>
+      <label class="check">
+        <input id="plus" type="checkbox">
+        <span>Lotto Plus, dopłata 1 zł</span>
+      </label>
+      <div class="rng-row">
+        <label>
+          Źródło losowości
+          <select id="entropy-source"></select>
+        </label>
+        <label>
+          <span id="count-label">Ile zakładów</span>
+          <input id="random-count" type="number" min="1" value="1" inputmode="numeric">
+        </label>
+      </div>
+      <p class="hint">Wpisz liczbę i naciśnij Chybił trafił. Przytrzymaj E, aby dodawać po jednym zakładzie.</p>
+      <div class="actions">
+        <button id="random" class="solid" type="button">Chybił trafił</button>
+        <button id="add-ticket" class="primary" type="button">Dodaj zakład</button>
+      </div>
+      <p id="rng-error" class="error" role="alert"></p>
+      <button id="clear-pick" class="text" type="button">Wyczyść zaznaczenie</button>
+      <p id="coupon-meta" class="meta"></p>
+      <p id="entropy-note" class="hint"></p>
+      <div id="ticket-list"></div>
+    </section>
+
+    <section class="panel" aria-labelledby="check-title">
+      <h2 id="check-title">Sprawdź wynik</h2>
+      <div class="modes">
+        <button type="button" data-mode="future" aria-pressed="true">Przyszłe losowanie</button>
+        <button type="button" data-mode="past" aria-pressed="false">Minione losowanie</button>
+      </div>
+      <div id="panel-future">
+        <p id="next-draw" class="hint"></p>
+        <button id="draw-future" class="primary" type="button">Wylosuj wynik</button>
+        <p id="draw-error" class="error" role="alert"></p>
+      </div>
+      <form id="past-form" class="stack" hidden>
+        <label>
+          Data losowania
+          <input id="past-date" name="date" type="date" required>
+        </label>
+        <label>
+          Liczby Lotto
+          <input id="past-lotto" name="lotto" type="text" inputmode="numeric" autocomplete="off" spellcheck="false" placeholder="np. 9 17 20 22 27 48" required>
+        </label>
+        <label>
+          Liczby Lotto Plus
+          <input id="past-plus" name="plus" type="text" inputmode="numeric" autocomplete="off" spellcheck="false" placeholder="opcjonalnie, 6 liczb">
+        </label>
+        <p id="form-error" class="error" role="alert"></p>
+        <button class="primary" type="submit">Sprawdź kupon</button>
+      </form>
+      <div id="results" aria-live="polite"></div>
+    </section>
+  </main>
+
+  <footer class="wrap foot">
+    <p>Symulator do zabawy. Oficjalne wyniki są na lotto.pl. Tutaj sprawdzasz kupon na symulacji albo na liczbach, które sam wpiszesz.</p>
+  </footer>
+  <noscript><p class="wrap">Włącz JavaScript, żeby korzystać z symulatora.</p></noscript>
+  <script src="lotto.js"></script>
+  <script src="qrng.js"></script>
+  <script src="app.js"></script>
+</body>
+</html>
